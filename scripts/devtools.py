@@ -6,13 +6,13 @@ import re
 import tempfile
 
 from cement.core.foundation import CementApp
-from cement.core.controller import CementBaseController, expose
+from cement.ext.ext_argparse import ArgparseController, expose
 from cement.utils.version import get_version
 from cement.utils import shell
 
 VERSION = get_version()
 
-class CementDevtoolsController(CementBaseController):
+class CementDevtoolsController(ArgparseController):
     class Meta:
         label = 'base'
         arguments = [
@@ -24,8 +24,6 @@ class CementDevtoolsController(CementBaseController):
                   action='store_true', dest='ignore_errors')),
             (['--loud'], dict(help='add more verbose output',
              action='store_true', dest='loud')),
-            (['modifier1'],
-             dict(help='command modifier positional argument', nargs='?')),
         ]
 
     def _do_error(self, msg):
@@ -48,13 +46,13 @@ class CementDevtoolsController(CementBaseController):
         # make sure we don't have any un-added files
         print('Checking for Untracked Files')
         out, err, res = shell.exec_cmd(['git', 'status'])
-        if re.match('Untracked files', out):
+        if re.match('Untracked files', str(out)):
             self._do_error('There are untracked files.  See `git status`.')
 
         # make sure there isn't an existing tag
         print("Checking for Duplicate Git Tag")
         out, err, res = shell.exec_cmd(['git', 'tag'])
-        for ver in out.split('\n'):
+        for ver in str(out).split('\n'):
             if ver == VERSION:
                 self._do_error("Tag %s already exists" % VERSION)
 
@@ -67,12 +65,12 @@ class CementDevtoolsController(CementBaseController):
     def _do_tests(self):
         print('Running Nose Tests')
         out, err, res = shell.exec_cmd(['which', 'nosetests'])
-
+        nose = out.decode('utf-8').strip()
         if self.app.pargs.loud:
-            cmd_args = ['coverage', 'run', out.strip(), '--verbosity=3']
+            cmd_args = ['coverage', 'run', nose, '--verbosity=3']
             res = shell.exec_cmd2(cmd_args)
         else:
-            cmd_args = ['coverage', 'run', out.strip(), '--verbosity=0']
+            cmd_args = ['coverage', 'run', nose, '--verbosity=0']
             out, err, res = shell.exec_cmd(cmd_args)
         if res > 0:
             self._do_error("\n\nNose tests did not pass.\n\n" +
@@ -84,7 +82,7 @@ class CementDevtoolsController(CementBaseController):
         out, err, res = shell.exec_cmd(cmd_args)
         if res > 0:
             self._do_error("\n\nPEP8 checks did not pass.\n\n" +
-                           "$ %s\n%s" % (' '.join(cmd_args), out))
+                           "$ %s\n%s" % (' '.join(cmd_args), str(out)))
 
     @expose(help='run all unit tests')
     def run_tests(self):
@@ -97,6 +95,10 @@ class CementDevtoolsController(CementBaseController):
         self._do_tests()
         print('')
 
+    @expose(help='run pep8 tests')
+    def pep8(self):
+        self._do_pep8()
+
     def _do_sphinx(self, dest_path):
         print("Building Documentation")
         cmd_args = ['rm', '-rf', 'docs/build/*']
@@ -104,7 +106,7 @@ class CementDevtoolsController(CementBaseController):
         out, err, res = shell.exec_cmd(cmd_args)
         if res > 0:
             self._do_error("\n\nFailed to build sphinx documentation\n\n" +
-                           "$ %s\n%s" % (' '.join(cmd_args), out))
+                           "$ %s\n%s" % (' '.join(cmd_args), str(out)))
 
     @expose(help='create a cement release')
     def make_release(self):
@@ -112,7 +114,7 @@ class CementDevtoolsController(CementBaseController):
         print("Making Release for Version %s" % VERSION)
         print('-' * 77)
         if not self.app.pargs.noprompt:
-            res = raw_input("Continue? [yN] ")
+            res = input("Continue? [yN] ")
             if res not in ['Y', 'y', '1']:
                 sys.exit(1)
 

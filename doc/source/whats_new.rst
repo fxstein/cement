@@ -3,7 +3,13 @@
 What's New
 ==========
 
-New Features in Cement 2.7
+New Features in Cement 2.9
+--------------------------
+
+ * FIXME
+
+
+New Features in Cement 2.8
 --------------------------
 
 ArgparseController
@@ -43,8 +49,22 @@ Extensions
       ability to magically perform BASH autocompletion by simply loading the
       ``argcomplete`` extension.  (Requires ``ArgparseArgumentHandler`` and
       ``ArgparseController`` to function).
-    * :ref:`Tabulate <cement.ext.ext_tabulate>` - Provides tabulatized output
+    * :ref:`Tabulate <cement.ext.ext_tabulate>` - Provides tabularized output
       familiar to users of MySQL, PGSQL, Etc.
+    * :ref:`Alarm <cement.ext.ext_alarm>` - Provides quick access to 
+      setting an application alarm to easily handling timing out long running
+      operations.
+    * :ref:`Memcached <cement.ext.ext_memcached>` - Now supported on Python 3. 
+
+
+Misc Enhancements
+^^^^^^^^^^^^^^^^^
+
+    * Cement now supports the ability to reload runtime within the current
+      process via ``app.reload()``.  This will enable future refactoring of
+      the ``ext_reload_config`` extension that is intended to handle 
+      reloading runtime after configuration files are modified.  This 
+      affectively adds ``SIGHUP`` support.
 
 
 New Features in Cement 2.6

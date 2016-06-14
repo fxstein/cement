@@ -1,8 +1,62 @@
-"""Tabulate extension module."""
+"""
+The Tabulate Extension provides output handling based on the
+`Tabulate <https://pypi.python.org/pypi/tabulate>`_ library.  It's format is
+familiar to users of MySQL, Postgres, etc.
+
+Requirements
+------------
+
+ * Tabulate (``pip install tabulate``)
+
+
+Configuration
+-------------
+
+This extension does not support any configuration settings.
+
+
+Usage
+-----
+
+.. code-block:: python
+
+    from cement.core import foundation
+
+    class MyApp(foundation.CementApp):
+        class Meta:
+            label = 'myapp'
+            extensions = ['tabulate']
+            output_handler = 'tabulate'
+
+    with MyApp() as app:
+        app.run()
+
+        # create a dataset
+        headers = ['NAME', 'AGE', 'ADDRESS']
+        data = [
+            ["Krystin Bartoletti", 47, "PSC 7591, Box 425, APO AP 68379"],
+            ["Cris Hegan", 54, "322 Reubin Islands, Leylabury, NC 34388"],
+            ["George Champlin", 25, "Unit 6559, Box 124, DPO AA 25518"],
+            ]
+
+        app.render(data, headers=headers)
+
+
+Looks like:
+
+.. code-block:: console
+
+    | NAME               | AGE | ADDRESS                                 |
+    |--------------------+-----+-----------------------------------------|
+    | Krystin Bartoletti |  47 | PSC 7591, Box 425, APO AP 68379         |
+    | Cris Hegan         |  54 | 322 Reubin Islands, Leylabury, NC 34388 |
+    | George Champlin    |  25 | Unit 6559, Box 124, DPO AA 25518        |
+
+"""
 
 import sys
 from tabulate import tabulate
-from ..core import output, exc, handler
+from ..core import output, exc
 from ..utils.misc import minimal_logger
 
 LOG = minimal_logger(__name__)
@@ -21,79 +75,30 @@ class TabulateOutputHandler(output.CementOutputHandler):
     must include ``tabulate`` in your applications dependencies as Cement
     explicitly does **not** include external dependencies for optional
     extensions.
-
-    Usage:
-
-    .. code-block:: python
-
-        from cement.core import foundation
-
-        class MyApp(foundation.CementApp):
-            class Meta:
-                label = 'myapp'
-                extensions = ['tabulate']
-                output_handler = 'tabulate'
-        # ...
-
-    Usage:
-
-    .. code-block:: python
-
-        # create a dataset
-        headers = ['NAME', 'AGE', 'ADDRESS']
-        data = [
-            ["Krystin Bartoletti", 47, "PSC 7591, Box 425, APO AP 68379"],
-            ["Cris Hegan", 54, "322 Reubin Islands, Leylabury, NC 34388"],
-            ["George Champlin", 25, "Unit 6559, Box 124, DPO AA 25518"],
-            ]
-
-        # via the app object
-        myapp.render(data, headers=headers)
-
-        # or from within a controller or handler
-        self.app.render(data, headers=headers)
-
-
-    Looks like:
-
-    .. code-block:: console
-
-        | NAME               | AGE | ADDRESS                                 |
-        |--------------------+-----+-----------------------------------------|
-        | Krystin Bartoletti |  47 | PSC 7591, Box 425, APO AP 68379         |
-        | Cris Hegan         |  54 | 322 Reubin Islands, Leylabury, NC 34388 |
-        | George Champlin    |  25 | Unit 6559, Box 124, DPO AA 25518        |
-
-
-
-    Configuration:
-
-    This extension does not support any configuration file settings.
-
     """
 
     class Meta:
 
         """Handler meta-data."""
-        
+
         interface = output.IOutput
         label = 'tabulate'
 
         #: Whether or not to pad the output with an extra pre/post '\n'
         padding = True
 
-        #: Default template format.  See the ``tabulate`` documentation for 
+        #: Default template format.  See the ``tabulate`` documentation for
         #: all supported template formats.
         format = 'orgtbl'
 
         #: Default headers to use.
         headers = []
 
-        #: Default alignment for string columns.  See the ``tabulate`` 
+        #: Default alignment for string columns.  See the ``tabulate``
         #: documentation for all supported ``stralign`` options.
         string_alignment = 'left'
 
-        #: Default alignment for numeric columns.  See the ``tabulate`` 
+        #: Default alignment for numeric columns.  See the ``tabulate``
         #: documentation for all supported ``numalign`` options.
         numeric_alignment = 'decimal'
 
@@ -107,11 +112,9 @@ class TabulateOutputHandler(output.CementOutputHandler):
         #: to override the ``output_handler`` via command line options.
         overridable = False
 
-
-
     def render(self, data, **kw):
         """
-        Take a data dictionary and render it into a table.  Additional 
+        Take a data dictionary and render it into a table.  Additional
         keyword arguments are passed directly to ``tabulate.tabulate``.
 
 
@@ -124,12 +127,15 @@ class TabulateOutputHandler(output.CementOutputHandler):
         headers = kw.get('headers', self._meta.headers)
 
         out = tabulate(data, headers,
-            tablefmt=kw.get('tablefmt', self._meta.format),
-            stralign=kw.get('stralign', self._meta.string_alignment),
-            numalign=kw.get('numalign', self._meta.numeric_alignment),
-            missingval=kw.get('missingval', self._meta.missing_value),
-            floatfmt=kw.get('floatfmt', self._meta.float_format),
-            )
+                       tablefmt=kw.get('tablefmt', self._meta.format),
+                       stralign=kw.get(
+                           'stralign', self._meta.string_alignment),
+                       numalign=kw.get(
+                           'numalign', self._meta.numeric_alignment),
+                       missingval=kw.get(
+                           'missingval', self._meta.missing_value),
+                       floatfmt=kw.get('floatfmt', self._meta.float_format),
+                       )
         out = out + '\n'
 
         if self._meta.padding is True:
@@ -139,4 +145,4 @@ class TabulateOutputHandler(output.CementOutputHandler):
 
 
 def load(app):
-    handler.register(TabulateOutputHandler)
+    app.handler.register(TabulateOutputHandler)

@@ -1,9 +1,9 @@
 """
-The Argparse Framework Extension provides argument handling based on
+The Argparse Extension provides argument handling based on
 :py:class:`argparse.ArgumentParser`, and is the default argument handler
 used by :class:`cement.core.foundation.CementApp`.  In addition, this
 extension also provides :class:`ArgparseController` that enables rapid
-development with application controllers.
+development via application controllers based on Argparse.
 
 Requirements
 ------------
@@ -168,7 +168,8 @@ The above looks like:
 import re
 import sys
 from argparse import ArgumentParser, SUPPRESS
-from ..core import backend, arg, handler, hook
+from ..core import backend, arg
+from ..core.handler import CementBaseHandler
 from ..core.arg import CementArgumentHandler, IArgument
 from ..core.controller import IController
 from ..core.exc import FrameworkError
@@ -246,11 +247,11 @@ class expose(object):
     the argument parser.
 
     :param hide: Whether the command should be visible.
-    :type hide: boolean
+    :type hide: ``boolean``
     :param arguments: List of tuples that define arguments to add to this
      commands sub-parser.
     :keyword parser_options: Additional options to pass to Argparse.
-    :type parser_options: dict
+    :type parser_options: ``dict``
 
     Usage:
 
@@ -304,7 +305,7 @@ class expose(object):
 # classes in Cement 3, but that would break the interface spec in 2.x
 
 
-class ArgparseController(handler.CementBaseHandler):
+class ArgparseController(CementBaseHandler):
 
     """
     This is an implementation of the
@@ -466,7 +467,7 @@ class ArgparseController(handler.CementBaseHandler):
 
         # list to maintain which controllers we haven't resolved yet
         unresolved_controllers = []
-        for contr in handler.list('controller'):
+        for contr in self.app.handler.list('controller'):
             # don't include self/base
             if contr == self.__class__:
                 continue
@@ -591,7 +592,7 @@ class ArgparseController(handler.CementBaseHandler):
         contr = command['controller']
 
         hide_it = False
-        if command['hide'] == True:
+        if command['hide'] is True:
             hide_it = True
 
         # only hide commands from embedded controllers if the controller is
@@ -643,7 +644,7 @@ class ArgparseController(handler.CementBaseHandler):
         self._parser = parsers['base']
 
         # and if only base controller registered... go ahead and return
-        if len(handler.list('controller')) <= 1:
+        if len(self.app.handler.list('controller')) <= 1:
             return    # pragma: nocover
 
         # note that the order of self._controllers was already organized by
@@ -910,4 +911,4 @@ class ArgparseController(handler.CementBaseHandler):
 
 
 def load(app):
-    handler.register(ArgparseArgumentHandler)
+    app.handler.register(ArgparseArgumentHandler)

@@ -6,18 +6,66 @@ Upgrading
 This section outlines any information and changes that might need to be made
 in order to update your application built on previous versions of Cement.
 
+Upgrading from 2.8.x to 2.9.x
+-----------------------------
+
+Cement 2.9 introduces a few incompatible changes from the previous 2.8 stable
+release, as noted in the :ref:`ChangeLog <changelog>`.
+
+ * FIXME
+
+
 Upgrading from 2.6.x to 2.8.x
 -----------------------------
 
 Cement 2.8 introduced a few incompatible changes from the previous 2.6 stable
 release, as noted in the :ref:`ChangeLog <changelog>`.
 
+TypeError: my_signal_hook() takes exactly 2 arguments (3 given)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In Cement 2.6, functions registered to the ``signal`` hook were only 
+expected/required to accept the ``signum`` and ``frame`` arguments, however
+``signal`` hook functions must now also accept the ``app`` object as an 
+argument as well.
+
+After upgrading to Cement 2.8, you might receive something similar to the 
+following exception:
+
+.. code-block:: console
+
+    TypeError: my_signal_hook() takes exactly 2 arguments (3 given)
+
+
+The fix is to simply prefix any ``signal`` hook functions with an ``app`` 
+argument.
+
+For example:
+
+.. code-block:: python
+
+    def my_signal_hook(signum, frame):
+        pass
+
+Would need to be:
+
+.. code-block:: python
+
+    def my_signal_hook(app, signum, frame):
+        pass
+
+
+Related:
+
+    * :issue:`311`
+
+
 TypeError: render() got an unexpected keyword argument
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In Cement 2.6, output handlers were not required to access ``**kwargs``, 
-however due to a design flaw this is now required to allow applications to 
-mix different types of output handlers that support different features.  
+In Cement 2.6, output handlers were not required to accept ``**kwargs``, 
+however this is now required to allow applications to mix different types of 
+output handlers together that might support different features/usage.  
 
 After upgrading to Cement 2.8, you might receive something similar to the 
 following exception:
@@ -27,9 +75,10 @@ following exception:
     TypeError: render() got an unexpected keyword argument
 
 
-This would most likely be the case becase you have created your own custom
-output handler, or are using a third-party output handler.  The fix is to 
-simply add ``**kwargs`` to the end of the `render()` method.
+This would most likely be the case because you have created your own custom
+output handler, or are using a third-party output handler that has not been
+updated to support Cement 2.8 yet.  The fix is to simply add ``**kwargs`` to 
+the end of the `render()` method.
 
 For example:
 

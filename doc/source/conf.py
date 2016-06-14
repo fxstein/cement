@@ -61,8 +61,7 @@ MOCK_MODULES = [
     'colorlog',
     'argcomplete',
     ]
-# for mod_name in MOCK_MODULES:
-#     sys.modules[mod_name] = Mock()
+
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
@@ -102,7 +101,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Cement'
-copyright = u'2009-2015, Data Folk Labs, LLC'
+copyright = u'2009-2016, Data Folk Labs, LLC'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

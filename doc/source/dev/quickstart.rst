@@ -189,7 +189,6 @@ handle command dispatch and rapid development.
 
     from cement.core.foundation import CementApp
     from cement.core.controller import CementBaseController, expose
-    from cement.core import handler
 
     class MyBaseController(CementBaseController):
         class Meta:
@@ -259,7 +258,7 @@ Lets see what this looks like:
       command2 (aliases: cmd2)
         more of nothing
 
-      some-other-command (aliases: some-cmd)
+      second-cmd1 (aliases: some-cmd)
         this is some command
 
     optional arguments:

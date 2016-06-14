@@ -100,7 +100,7 @@ class IController(interface.Interface):
         or the application to make further calls to it.
 
         :param app_obj: The application object.
-        :returns: None
+        :returns: ``None``
 
         """
 
@@ -115,7 +115,7 @@ class IController(interface.Interface):
         arguments (I.e. self.app.args.parse()).
 
         :returns: Returns the result of the executed controller function,
-        or ``None`` if no controller function is called.
+          or ``None`` if no controller function is called.
 
         """
 
@@ -136,7 +136,7 @@ class expose(object):
      which you do not want displayed.  Effecively, if there are aliases and
      `aliases_only` is True, then aliases[0] will appear as the actual
      command/function label.
-    :type aliases: list
+    :type aliases: ``list``
 
     Usage:
 
@@ -171,7 +171,7 @@ class expose(object):
         metadict['func_name'] = func.__name__
         metadict['exposed'] = True
         metadict['hide'] = self.hide
-        metadict['help'] = self.help
+        metadict['help'] = self.help or func.__doc__
         metadict['aliases'] = self.aliases
         metadict['aliases_only'] = self.aliases_only
         metadict['controller'] = None  # added by the controller
@@ -238,8 +238,8 @@ class CementBaseController(handler.CementBaseHandler):
         """
         A list of aliases for the controller.  Will be treated like
         command/function aliases for non-stacked controllers.  For example:
-        'myapp <controller_label> --help' is the same as
-        'myapp <controller_alias> --help'.
+        ``myapp <controller_label> --help`` is the same as
+        ``myapp <controller_alias> --help``.
         """
 
         aliases_only = False
@@ -365,7 +365,7 @@ class CementBaseController(handler.CementBaseHandler):
                 commands.append(func)
 
         # process stacked controllers second for commands and args
-        for contr in handler.list('controller'):
+        for contr in self.app.handler.list('controller'):
             # don't include self here
             if contr == self.__class__:
                 continue
@@ -482,7 +482,7 @@ class CementBaseController(handler.CementBaseHandler):
 
     @property
     def _usage_text(self):
-        """Returns the usage text displayed when '--help' is passed."""
+        """Returns the usage text displayed when ``--help`` is passed."""
 
         if self._meta.usage is not None:
             return self._meta.usage

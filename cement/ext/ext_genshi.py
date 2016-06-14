@@ -1,7 +1,67 @@
-"""Genshi extension module."""
+"""
+The Genshi Extension module provides output templating based on the
+`Genshi Text Templating Language \
+<http://genshi.edgewall.org/wiki/Documentation/text-templates.html>`_.
+
+
+Requirements
+------------
+
+ * Genshi (``pip install genshi``)
+
+
+Configuration
+-------------
+
+To **prepend** a directory to the ``template_dirs`` list defined by the
+application/developer, an end-user can add the configuration option
+``template_dir`` to their application configuration file under the main
+config section:
+
+.. code-block:: text
+
+    [myapp]
+    template_dir = /path/to/my/templates
+
+
+Usage
+-----
+
+.. code-block:: python
+
+    from cement.core.foundation import CementApp
+
+    class MyApp(CementApp):
+        class Meta:
+            label = 'myapp'
+            extensions = ['genshi']
+            output_handler = 'genshi'
+            template_module = 'myapp.templates'
+            template_dirs = [
+                '~/.myapp/templates',
+                '/usr/lib/myapp/templates',
+                ]
+
+    with MyApp() as app:
+        app.run()
+
+        # create some data
+        data = dict(foo='bar')
+
+        # render the data to STDOUT (default) via a template
+        app.render(data, 'my_template.genshi')
+
+
+Note that the above ``template_module`` and ``template_dirs`` are the
+auto-defined defaults but are added here for clarity.  From here, you
+would then put a Genshi template file in
+``myapp/templates/my_template.genshi`` or
+``/usr/lib/myapp/templates/my_template.genshi``.
+
+"""
 
 import sys
-from ..core import output, exc, handler
+from ..core import output, exc
 from ..utils.misc import minimal_logger
 from genshi.template import NewTextTemplate
 
@@ -18,63 +78,12 @@ class GenshiOutputHandler(output.TemplateOutputHandler):
     Please see the developer documentation on
     :ref:`Output Handling <dev_output_handling>`.
 
-    **Note** This extension has an external dependency on ``genshi``.  You
-    must include ``genshi`` in your applications dependencies as Cement
-    explicitly does *not* include external dependencies for optional
-    extensions.
-
-    Usage:
-
-    .. code-block:: python
-
-        from cement.core import foundation
-
-        class MyApp(foundation.CementApp):
-            class Meta:
-                label = 'myapp'
-                extensions = ['genshi']
-                output_handler = 'genshi'
-                template_module = 'myapp.templates'
-                template_dirs = [
-                    '~/.myapp/templates',
-                    '/usr/lib/myapp/templates',
-                    ]
-        # ...
-
-    Note that the above ``template_module`` and ``template_dirs`` are the
-    auto-defined defaults but are added here for clarity.  From here, you
-    would then put a Genshi template file in
-    ``myapp/templates/my_template.genshi`` and then render a data dictionary
-    with it:
-
-    .. code-block:: python
-
-        # via the app object
-        myapp.render(some_data_dict, 'my_template.genshi')
-
-        # or from within a controller or handler
-        self.app.render(some_data_dict, 'my_template.genshi')
-
-
-
-    Configuration:
-
-    To **prepend** a directory to the ``template_dirs`` list defined by the
-    application/developer, an end-user can add the configuration option
-    ``template_dir`` to their application configuration file under the main
-    config section:
-
-    .. code-block:: text
-
-        [myapp]
-        template_dir = /path/to/my/templates
-
     """
 
     class Meta:
 
         """Handler meta-data."""
-        
+
         interface = output.IOutput
         label = 'genshi'
 
@@ -100,4 +109,4 @@ class GenshiOutputHandler(output.TemplateOutputHandler):
 
 
 def load(app):
-    handler.register(GenshiOutputHandler)
+    app.handler.register(GenshiOutputHandler)
